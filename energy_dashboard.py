@@ -175,7 +175,7 @@ def dist_appl():
     wpd = hv.Distribution(df[df['Well']<1.1]['Well'], label="Well").opts(color="pink")
     mcrpd = hv.Distribution(df[df['Microwave']<1.1]['Microwave'], label="Microwave").opts(color="yellow")
     
-    distribution = (hopd * wcpd * bpd * lrpd * kpd * dwpd * fpd * frpd * gdpd * wpd * mcrpd)
+    distribution = hopd * wcpd * bpd * lrpd * kpd * dwpd * fpd * frpd * gdpd * wpd * mcrpd
     distribution.opts(opts.Distribution(xlabel="Energy Consumption", ylabel="Density", xformatter='%.2fkw',title='Energy Consumption of Appliances Distribution', width=800, height=350,tools=['hover'],show_grid=True))
     st.bokeh_chart(hv.render(distribution, backend='bokeh'))
 
@@ -261,12 +261,12 @@ if option == 'Energy Management Dashboard':
     st.write('You selected:', box2)
     appl_ts()
     
-    st.subheader("Weather Information Time-Series")
-    box3 = st.radio(
-     "select which weather element should be distributed?",
-     ('temperature', 'apparent_temperature', 'humidity', 'visibility', 'pressure', 
-          'windspeed', 'windbearing', 'precipitation_intensity', 'dewpoint', 'precipitation_probability'))
-    st.write("You've selected", box3, "time-series")    
+#     st.subheader("Weather Information Time-Series")
+#     box3 = st.radio(
+#      "select which weather element should be distributed?",
+#      ('temperature', 'apparent_temperature', 'humidity', 'visibility', 'pressure', 
+#           'windspeed', 'windbearing', 'precipitation_intensity', 'dewpoint', 'precipitation_probability'))
+#     st.write("You've selected", box3, "time-series")    
         
     st.subheader("Energy Consumption of Appliances Distribution")
     dist_appl()
