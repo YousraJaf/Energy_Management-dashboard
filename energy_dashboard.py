@@ -58,17 +58,6 @@ def avg_econ_t():
     energy_cons = hv.Curve(df_energy).opts(width=800, height=500, xlabel= 'time', ylabel= 'House overall energy in [kW]', title=f'Average energy consumption per {time}', tools=['hover'])
     st.bokeh_chart(hv.render(energy_cons, backend='bokeh'))
     
-def tsday_congen():
-    use = df.filter(items=['HO_use']).resample('D').mean()
-    line1 = hv.Curve(use).opts(title="Total Energy Consumption Time-Series by Day", color="red", ylabel="Energy Consumption")
-
-    gen  = df.filter(items=['Sol_gen']).resample('D').mean()
-    line2 = hv.Curve(gen).opts(title="Total Energy Generation Time-Series by Day", color="blue", ylabel="Energy Generation")
-    
-    mult_line_plot = line1 + line2
-    mult_line_plot.opts(opts.Curve(xlabel="Time", yformatter='%.2fkw', width=600, height=400, line_width=0.60, tools=['hover'], show_grid=True,fontsize={'title':11}))
-    st.bokeh_chart(hv.render(mult_line_plot, backend='bokeh'))
-    
 def groupbymonth(col):
     return df[[col, 'month']].groupby(by='month').agg({col:'mean'})[col]
     
@@ -90,7 +79,9 @@ def groupbyperiods(col):
     
 def ts_congen():
     if box1 == 'by day':
-        tsday_congen()
+        use = hv.Curve(df.filter(items=['HO_use']).resample('D').mean()).opts(title="Total Energy Consumption Time-Series by Day", color="red", ylabel="Energy Consumption")
+        gen = hv.Curve(df.filter(items=['Sol_gen']).resample('D').mean()).opts(title="Total Energy Generation Time-Series by Day", color="blue", ylabel="Energy Generation")
+        xlab = "Day"
     elif box1 == 'by month':
         use = hv.Curve(groupbymonth('HO_use')).opts(title="Total Energy Consumption Time-Series by Month", color="red", ylabel="Energy Consumption")
         gen = hv.Curve(groupbymonth('Sol_gen')).opts(title="Total Energy Generation Time-Series by Month", color="blue", ylabel="Energy Generation")
