@@ -1,12 +1,8 @@
 import streamlit as st
 import pandas as pd
-# import matplotlib.pyplot as plt
-# import seaborn as sns
 import holoviews as hv
 from holoviews import opts
 hv.extension('bokeh')
-# import ipywidgets as wg
-# from IPython.display import display
 
 st.set_option('deprecation.showPyplotGlobalUse', False)
 option = st.sidebar.selectbox("Which Dashboard?", ('Energy Management Dashboard', 'Machine Learning'))
@@ -48,16 +44,6 @@ df['periodsofday'] = df['hour'].apply(periods)
 
 df.rename({'windSpeed': 'windspeed', 'windBearing': 'windbearing', 'precipIntensity': 'precipitation_intensity', 'dewPoint': 'dewpoint', 'precipProbability': 'precipitation_probability', 'apparentTemperature_Celsius': 'apparent_temperature', 'temperature_Celsius': 'temperature'}, axis=1, inplace=True)
 
-def avg_econ_t():
-    if genre == 'per day':
-        time = 'day'
-        df_energy = df.filter(items=['HO_use']).resample('D').mean()
-    else:
-        time = 'month'
-        df_energy = df.filter(items=['HO_use']).resample('M').mean()
-    energy_cons = hv.Curve(df_energy).opts(width=800, height=500, xlabel= 'time', ylabel= 'House overall energy in [kW]', title=f'Average energy consumption per {time}', tools=['hover'])
-    st.bokeh_chart(hv.render(energy_cons, backend='bokeh'))
-    
 def groupbymonth(col):
     return df[[col, 'month']].groupby(by='month').agg({col:'mean'})[col]
     
@@ -75,7 +61,53 @@ def groupbyperiods(col):
     periodsdf['periods_num'] = [['Morning', 'forenoon', 'Noon', 'Afternoon', 'Evening', 'Night'].index(i) for i in periodsdf.index]
     periodsdf.sort_values('periods_num', inplace=True)
     periodsdf.drop(['periods_num'], axis=1, inplace=True)
-    return periodsdf    
+    return periodsdf 
+
+def avg_econ_t():
+    if genre == 'per day':
+        time = 'day'
+        df_energy = df.filter(items=['HO_use']).resample('D').mean()
+    else:
+        time = 'month'
+        df_energy = df.filter(items=['HO_use']).resample('M').mean()
+    energy_cons = hv.Curve(df_energy).opts(width=800, height=500, xlabel= 'time', ylabel= 'House overall energy in [kW]', title=f'Average energy consumption per {time}', tools=['hover'])
+    st.bokeh_chart(hv.render(energy_cons, backend='bokeh'))
+
+def dist():
+    if box5 == 'Consumption and Generation':
+        use = hv.Distribution(df['HO_use']).opts(title="Total Energy Consumption Distribution", color="red")
+        gen = hv.Distribution(df['Sol_gen']).opts(title="Total Energy Generation Distribution", color="blue")
+        dist = use + gen
+        dist.opts(opts.Distribution(xlabel="Energy Consumption", ylabel="Density", xformatter='%.1fkw', width=600, height=400,tools=['hover'],show_grid=True))
+    elif box5 == 'House Appliances':
+        dw = hv.Distribution(df[df['Dishwasher']<1.0]['Dishwasher'],label="Dishwasher").opts(color="red")
+        ho = hv.Distribution(df[df['Home office']<1.0]['Home office'],label="Home office").opts(color="blue")
+        fr = hv.Distribution(df[df['Fridge']<1.0]['Fridge'],label="Fridge Distribution").opts(color="orange")
+        wc = hv.Distribution(df[df['Wine cellar']<1.0]['Wine cellar'],label="Wine cellar").opts(color="green")
+        gd = hv.Distribution(df[df['Garage door']<1.0]['Garage door'],label="Garage door").opts(color="purple")
+        ba = hv.Distribution(df[df['Barn']<1.0]['Barn'],label="Barn").opts(color="grey")
+        we = hv.Distribution(df[df['Well']<1.0]['Well'],label="Well").opts(color="pink")
+        mcr = hv.Distribution(df[df['Microwave']<1.0]['Microwave'],label="Microwave").opts(color="yellow")
+        lr = hv.Distribution(df[df['Living room']<1.0]['Living room'],label="Living room").opts(color="brown")
+        fu = hv.Distribution(df[df['Furnace']<1.0]['Furnace'],label="Furnace").opts(color="skyblue")
+        ki = hv.Distribution(df[df['Kitchen']<1.0]['Kitchen'],label="Kitchen").opts(color="lightgreen")
+
+        dist = dw * ho * fr * wc * gd * ba * we * mcr * lr * fu * ki
+        dist.opts(opts.Distribution(xlabel="Energy Consumption", ylabel="Density", xformatter='%.1fkw',title='Energy Consumption of Appliances Distribution', width=1000, height=500,tools=['hover'],show_grid=True))
+    else:
+        temp = hv.Distribution(df['temperature'],label="temperature").opts(color="red")
+        apTemp = hv.Distribution(df['apparent_temperature'],label="apparentTemperature").opts(color="orange")
+        temps = (temp * apTemp).opts(opts.Distribution(title='Temperature Distribution')).opts(legend_position='top',legend_cols=2)
+        hmd = hv.Distribution(df['humidity']).opts(color="yellow", title='Humidity Distribution')
+        vis = hv.Distribution(df['visibility']).opts(color="blue", title='Visibility Distribution')
+        prs = hv.Distribution(df['pressure']).opts(color="green", title='Pressure Distribution')
+        wnd = hv.Distribution(df['windspeed']).opts(color="purple", title='WindSpeed Distribution')
+        prc = hv.Distribution(df['precipitation_intensity']).opts(color="skyblue", title='PrecipIntensity Distribution')
+        dew = hv.Distribution(df['dewpoint']).opts(color="lightgreen", title='DewPoint Distribution')
+
+        dist = temps + hmd + vis + prs + wnd + prc + dew
+        dist.opts(opts.Distribution(xlabel="Values", ylabel="Density", width=600, height=400,tools=['hover'],show_grid=True)).cols(2)
+    st.bokeh_chart(hv.render(dist, backend='bokeh'))
     
 def ts_congen():
     if box1 == 'by day':
@@ -241,6 +273,13 @@ if option == 'Energy Management Dashboard':
     st.subheader("Here's how our dataframe (for hourly redaing) looks like after cleaning:")
     st.dataframe(df)
     
+    st.subheader("Distribution")
+    radio3_names = ['Consumption and Generation', 'House Appliances', 'Weather Information']
+    box5 = st.radio(
+     "select which distribution should be plotted?", radio3_names)
+    st.write("You've selected", box5, "distribution")
+    dist()
+    
     st.subheader("Average energy consumption")
     radio1_names = ['per day', 'per month']
     genre = st.radio(
@@ -280,21 +319,13 @@ if option == 'Energy Management Dashboard':
     st.write("You've selected relation between apparent temperature and household overall energy consumption by", box4)
     atem_vscon()
     
-    st.subheader("Weather element distribution")
-    radio3_names = ['temperature', 'apparent_temperature', 'humidity', 'visibility', 'pressure', 
-          'windspeed', 'windbearing', 'precipitation_intensity', 'dewpoint', 'precipitation_probability']
-    box5 = st.radio(
-     "select which weather element should be distributed?", radio3_names)
-    st.write("You've selected", box5, "distribution")
-    weat_dist()
+#     st.subheader("Total Energy Consumption Distribution")
+#     option1 = st.radio(
+#      "Plot distribution for",
+#      ('rooms', 'devices', 'all'))
     
-    st.subheader("Total Energy Consumption Distribution")
-    option1 = st.radio(
-     "Plot distribution for",
-     ('rooms', 'devices', 'all'))
-    
-    st.write("You've selected Total Energy Consumption Distribution by", option1)
-    energy_dist()
+#     st.write("You've selected Total Energy Consumption Distribution by", option1)
+#     energy_dist()
         
    
    
