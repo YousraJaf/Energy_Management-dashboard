@@ -188,6 +188,57 @@ def appl_ts():
     appliances_timeseries.opts(opts.Curve(xlabel=xlab, line_width=0.75, ylabel="Energy Consumption", yformatter='%.2fkw' ,
                                                                            width=600, height=400,tools=['hover'],show_grid=True)).cols(2)
     st.bokeh_chart(hv.render(appliances_timeseries, backend='bokeh'))
+    
+def weather_ts():
+    if box3 == 'by day':
+        temp = hv.Curve(df['temperature'].resample('D').mean(),label="temperature").opts(color="red")
+        apTemp = hv.Curve(df['apparent_temperature'].resample('D').mean(),label="apparentTemperature").opts(color="orange")
+        temps = (temp * apTemp).opts(opts.Curve(title='Temperature Time-Series by Day')).opts(legend_position='top',legend_cols=2)
+        hmd = hv.Curve(df['humidity'].resample('D').mean()).opts(color="yellow", title='Humidity Time-Series by Day')
+        vis = hv.Curve(df['visibility'].resample('D').mean()).opts(color="blue", title='Visibility Time-Series by Day')
+        prs = hv.Curve(df['pressure'].resample('D').mean()).opts(color="green", title='Pressure Time-Series by Day')
+        wnd = hv.Curve(df['windspeed'].resample('D').mean()).opts(color="purple", title='Windspeed Time-Series by Day')
+        prc = hv.Curve(df['precipitation_intensity'].resample('D').mean()).opts(color="skyblue", title='Intensity of precipitation Time-Series by Day')
+        dew = hv.Curve(df['dewpoint'].resample('D').mean()).opts(color="lightgreen", title='Dewpoint Time-Series by Day')
+        xlab = "Day"
+    elif box3 == 'by month':
+        temp = hv.Curve(groupbymonth('temperature'),label="temperature").opts(color="red")
+        apTemp = hv.Curve(groupbymonth('apparent_temperature'),label="apparent_temperature").opts(color="orange")
+        temps = (temp * apTemp).opts(opts.Curve(title='Temperature Time-Series by Month')).opts(legend_position='top',legend_cols=2)
+        hmd = hv.Curve(groupbymonth('humidity'),label="Humidity Time-Series by Month").opts(color="yellow")
+        vis = hv.Curve(groupbymonth('visibility'),label="Visibility Time-Series by Month").opts(color="blue")
+        prs = hv.Curve(groupbymonth('pressure'),label="Pressure Time-Series by Month").opts(color="green")
+        wnd = hv.Curve(groupbymonth('windspeed'),label="Windspeed Time-Series by Month").opts(color="purple")
+        prc = hv.Curve(groupbymonth('precipitation_intensity'),label="Intensity of precipitation Time-Series by Month").opts(color="skyblue")
+        dew = hv.Curve(groupbymonth('dewpoint'),label="Dewpoint Time-Series by Month").opts(color="lightgreen")
+        xlab = "Months"
+    elif box3 == 'by weekdays':
+        temp = hv.Curve(groupbyweekday('temperature'),label="temperature").opts(color="red")
+        apTemp = hv.Curve(groupbyweekday('apparent_temperature'),label="apparent_temperature").opts(color="orange")
+        temps = (temp * apTemp).opts(opts.Curve(title='Temperature Time-Series by Weekdays')).opts(legend_position='top',legend_cols=2)
+        hmd = hv.Curve(groupbyweekday('humidity'),label="Humidity Time-Series by Weekdays").opts(color="brown")
+        vis = hv.Curve(groupbyweekday('visibility'),label="Visibility Time-Series by Weekdays").opts(color="blue")
+        prs = hv.Curve(groupbyweekday('pressure'),label="Pressure Time-Series by Weekdays").opts(color="green")
+        wnd = hv.Curve(groupbyweekday('windspeed'),label="Windspeed Time-Series by Weekdays").opts(color="purple")
+        prc = hv.Curve(groupbyweekday('precipitation_intensity'),label="Intensity of precipitation Time-Series by Weekdays").opts(color="skyblue")
+        dew = hv.Curve(groupbyweekday('dewpoint'),label="Dewpoint Time-Series by Weekdays").opts(color="lightgreen")
+        xlab = "Weekdays"
+    else:
+        temp = hv.Curve(groupbyperiods('temperature'),label="temperature").opts(color="red")
+        apTemp = hv.Curve(groupbyperiods('apparent_temperature'),label="apparent_temperature").opts(color="orange")
+        temps = (temp * apTemp).opts(opts.Curve(title='Temperature Time-Series by Periods of day')).opts(legend_position='top',legend_cols=2)
+        hmd = hv.Curve(groupbyperiods('humidity'),label="Humidity Time-Series by Periods of day").opts(color="brown")
+        vis = hv.Curve(groupbyperiods('visibility'),label="Visibility Time-Series by Periods of day").opts(color="blue")
+        prs = hv.Curve(groupbyperiods('pressure'),label="Pressure Time-Series by Periods of day").opts(color="green")
+        wnd = hv.Curve(groupbyperiods('windspeed'),label="Windspeed Time-Series by Periods of day").opts(color="purple")
+        prc = hv.Curve(groupbyperiods('precipitation_intensity'),label="Intensity of precipitation Time-Series by Periods of day").opts(color="skyblue")
+        dew = hv.Curve(groupbyperiods('dewpoint'),label="Dewpoint Time-Series by Periods of day").opts(color="lightgreen")
+        xlab = "Periods of day"
+        
+    weather_timeseries = temps + hmd + vis + prs + wnd + prc + dew
+    weather_timeseries.opts(opts.Curve(xrotation= 30, xlabel=xlab, ylabel="Values", width=400, height=300,tools=['hover'],show_grid=True)).cols(2)
+    st.bokeh_chart(hv.render(weather_timeseries, backend='bokeh'))    
+    
   
 prox = [df_day, df_month]
 def atem_vscon():
@@ -260,12 +311,13 @@ if option == 'Energy Management Dashboard':
     st.write('You selected:', box2)
     appl_ts()
     
-#     st.subheader("Weather Information Time-Series")
-#     radio2_names = ['temperature', 'apparent_temperature', 'humidity', 'visibility', 'pressure', 
-#           'windspeed', 'windbearing', 'precipitation_intensity', 'dewpoint', 'precipitation_probability']
-#     box3 = st.radio(
-#      "select which weather element should be distributed?", radio2_names, index=0)
-#     st.write("You've selected", box3, "time-series")    
+    st.subheader("Weather Information Time-Series")
+    st.write("select weather elements Time-Series by day, month, weekdays or periods of day:")
+    box_names = ['by day', 'by month', 'by weekdays', 'by periods of day']
+    box3 = st.selectbox(
+     "select time-series", box_names)
+    st.write("You've selected weather element time-series", box3)
+    weather_ts()
         
 #     st.subheader("Energy Consumption of Appliances Distribution")
 #     dist_appl()
