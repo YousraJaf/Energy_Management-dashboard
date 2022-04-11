@@ -129,10 +129,6 @@ def ts_congen():
     line = use + gen
     line.opts(opts.Curve(xrotation = 90, xlabel=xlab, yformatter='%.2fkw', width=600, height=400,tools=['hover'],show_grid=True,fontsize={'title':10}))
     st.bokeh_chart(hv.render(line, backend='bokeh'))
-    
-
-# appliances = ['Home office', 'Wine cellar', 'Barn', 'Living room', 'Kitchen', 'Dishwasher', 'Furnace',  'Fridge', 'Garage door', 'Well', 'Microwave']
-# app_colors = ["red", "orange", "blue", "yellow", "green", "grey", "purple", "pink", "skyblue", "lightgreen", "brown"]
 
 def appl_ts():
     if box2 == 'by day': 
@@ -192,26 +188,7 @@ def appl_ts():
     appliances_timeseries.opts(opts.Curve(xlabel=xlab, line_width=0.75, ylabel="Energy Consumption", yformatter='%.2fkw' ,
                                                                            width=600, height=400,tools=['hover'],show_grid=True)).cols(2)
     st.bokeh_chart(hv.render(appliances_timeseries, backend='bokeh'))
-    
-    
-# def dist_appl():
-#     hopd = hv.Distribution(df[df['Home office']<1.1]['Home office'], label="Home office").opts(color="blue")
-#     wcpd = hv.Distribution(df[df['Wine cellar']<1.1]['Wine cellar'], label="Wine cellar").opts(color="green")
-#     bpd = hv.Distribution(df[df['Barn']<1.1]['Barn'], label="Barn").opts(color="grey")
-#     lrpd = hv.Distribution(df[df['Living room']<1.1]['Living room'], label="Living room").opts(color="brown")
-#     kpd = hv.Distribution(df[df['Kitchen']<1.1]['Kitchen'], label="Kitchen").opts(color="lightgreen")
-#     dwpd = hv.Distribution(df[df['Dishwasher']<1.1]['Dishwasher'], label="Dishwasher").opts(color="red")
-#     fpd = hv.Distribution(df[df['Furnace']<1.1]['Furnace'], label="Furnace").opts(color="skyblue")
-#     frpd = hv.Distribution(df[df['Fridge']<1.1]['Fridge'], label="Fridge Distribution").opts(color="orange")
-#     gdpd = hv.Distribution(df[df['Garage door']<1.1]['Garage door'], label="Garage door").opts(color="purple")
-#     wpd = hv.Distribution(df[df['Well']<1.1]['Well'], label="Well").opts(color="pink")
-#     mcrpd = hv.Distribution(df[df['Microwave']<1.1]['Microwave'], label="Microwave").opts(color="yellow")
-    
-#     distribution = hopd * wcpd * bpd * lrpd * kpd * dwpd * fpd * frpd * gdpd * wpd * mcrpd
-#     distribution.opts(opts.Distribution(xlabel="Energy Consumption", ylabel="Density", xformatter='%.2fkw',title='Energy Consumption of Appliances Distribution', width=800, height=350,tools=['hover'],show_grid=True))
-#     st.bokeh_chart(hv.render(distribution, backend='bokeh'))
-
-
+  
 prox = [df_day, df_month]
 def atem_vscon():
     if box4 == 'day':
@@ -223,26 +200,6 @@ def atem_vscon():
     scatter.opts(width=800, height=500, title='Relation between apparent Temperature and Household overall energy consumption', xlabel='apparent Temperature in [°C]', ylabel='Consumption in [kWh]')
     st.bokeh_chart(hv.render(scatter, backend='bokeh')) 
     
-    
-# weather_elements = ['humidity','visibility', 'pressure', 'windspeed', 'windbearing', 'precipitation_intensity', 'dewpoint', 'precipitation_probability', 
-#                     'apparent_temperature', 'temperature']
-# colors = ["red", "orange", "blue", "yellow", "green", "grey", "purple", "pink", "skyblue", "lightgreen"]
-# def weat_dist():
-#     for index in range(len(weather_elements)):
-#         e = weather_elements[index] 
-#         c = colors[index] 
-#         t = f'{weather_elements[index]} distribution'
-#         if e == box5:
-#             element = e
-#             color = c
-#             title = t
-        
-#     weatherelement_dist = hv.Distribution(df[element]).opts(color=color, title=title)
-#     weatherelement_dist.opts(opts.Distribution(xlabel="Values", ylabel="Density", width=600, height=400, tools=['hover'],show_grid=True))   
-#     st.bokeh_chart(hv.render(weatherelement_dist, backend='bokeh'))
-    
-    
-
 def energy_dist():
     if option1 == 'rooms':
         df_sub = df.filter(items=['Home office', 'Wine cellar', 'Barn', 'Living room', 'Kitchen'])
