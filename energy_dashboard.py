@@ -260,8 +260,8 @@ def energy_dist():
         df_sub = df.filter(items=['Home office', 'Wine cellar', 'Barn', 'Living room', 'Kitchen', 'Dishwasher', 'Furnace',  'Fridge', 'Garage door', 'Well', 'Microwave'])
 
     sub_sum = pd.DataFrame(df_sub.sum(axis=0), columns=['total_energy_consumption'])
-    bar_chart = hv.Bars(sub_sum)
-    bar_chart.opts(xrotation=90, width=600, height=400, xlabel=f'{option}', ylabel='Consumption [kWh]', title=f'Total Consumption by all {option} in [kWh] from 2014-2016' )    
+    bar_chart = hv.Bars(sub_sum).opts(opts.Bars(color='green'))
+    bar_chart.opts(xrotation=90, width=600, height=400, xlabel=f'{option1}', ylabel='Consumption [kWh]', title=f'Total Consumption by all {option1} in [kWh] from 2014-2016' )    
     st.bokeh_chart(hv.render(bar_chart, backend='bokeh'))
     
 
@@ -318,23 +318,20 @@ if option == 'Energy Management Dashboard':
      "select time-series", box_names)
     st.write("You've selected weather element time-series", box3)
     weather_ts()
-        
-#     st.subheader("Energy Consumption of Appliances Distribution")
-#     dist_appl()
-    
+
     st.subheader("Relation between apparent Temperature and Household overall energy consumption")
     box4 = st.selectbox('select by?',
      ('day', 'month'))
     st.write("You've selected relation between apparent temperature and household overall energy consumption by", box4)
     atem_vscon()
     
-#     st.subheader("Total Energy Consumption Distribution")
-#     option1 = st.radio(
-#      "Plot distribution for",
-#      ('rooms', 'devices', 'all'))
+    st.subheader("Total Energy Consumption Distribution")
+    option1 = st.radio(
+     "Plot distribution for",
+     ('rooms', 'devices', 'all features'))
     
-#     st.write("You've selected Total Energy Consumption Distribution by", option1)
-#     energy_dist()
+    st.write("You've selected Total Energy Consumption Distribution by", option1)
+    energy_dist()
         
    
    
