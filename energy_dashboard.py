@@ -186,7 +186,7 @@ def appl_ts():
         
     appliances_timeseries = dw + ho + fr + wc + gd + ba + we + mcr + lr + fu + ki
     appliances_timeseries.opts(opts.Curve(xlabel=xlab, line_width=0.75, ylabel="Energy Consumption", yformatter='%.2fkw' ,
-                                                                           width=600, height=400,tools=['hover'],show_grid=True)).cols(2)
+                                                                           width=500, height=400,tools=['hover'],show_grid=True)).cols(2)
     st.bokeh_chart(hv.render(appliances_timeseries, backend='bokeh'))
     
 def weather_ts():
@@ -236,7 +236,7 @@ def weather_ts():
         xlab = "Periods of day"
         
     weather_timeseries = temps + hmd + vis + prs + wnd + prc + dew
-    weather_timeseries.opts(opts.Curve(xrotation= 30, xlabel=xlab, ylabel="Values", width=400, height=300,tools=['hover'],show_grid=True)).cols(2)
+    weather_timeseries.opts(opts.Curve(xrotation= 30, xlabel=xlab, ylabel="Values", width=500, height=400,tools=['hover'],show_grid=True)).cols(2)
     st.bokeh_chart(hv.render(weather_timeseries, backend='bokeh'))    
     
   
