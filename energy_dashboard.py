@@ -5,8 +5,8 @@ import pandas as pd
 import holoviews as hv
 from holoviews import opts
 hv.extension('bokeh')
-import ipywidgets as wg
-from IPython.display import display
+# import ipywidgets as wg
+# from IPython.display import display
 
 st.set_option('deprecation.showPyplotGlobalUse', False)
 option = st.sidebar.selectbox("Which Dashboard?", ('Energy Management Dashboard', 'Machine Learning'))
@@ -99,33 +99,67 @@ def ts_congen():
     st.bokeh_chart(hv.render(line, backend='bokeh'))
     
 
-appliances = ['Home office', 'Wine cellar', 'Barn', 'Living room', 'Kitchen', 'Dishwasher', 'Furnace',  'Fridge', 'Garage door', 'Well', 'Microwave']
-app_colors = ["red", "orange", "blue", "yellow", "green", "grey", "purple", "pink", "skyblue", "lightgreen", "brown"]
+# appliances = ['Home office', 'Wine cellar', 'Barn', 'Living room', 'Kitchen', 'Dishwasher', 'Furnace',  'Fridge', 'Garage door', 'Well', 'Microwave']
+# app_colors = ["red", "orange", "blue", "yellow", "green", "grey", "purple", "pink", "skyblue", "lightgreen", "brown"]
 
 def appl_ts():
-    for index in range(len(appliances)):
-        e = appliances[index] 
-        c = app_colors[index] 
-        t = f'{appliances[index]} timeseries'
-        if e == box2:
-            element = e
-            color = c
-            title = t
-            if box2 == 'by day':
-                appliances_timeseries = hv.Curve(df[element].resample('D').mean(),label=f'{title} by Day').opts(color=color)
-                xlab = 'Day'
-            elif box2 == 'by month':
-                appliances_timeseries = hv.Curve(groupbymonth(element),label=f'{title} by Month').opts(color=color)
-                xlab = 'Month'
-            elif box2 == 'by weekdays':
-                appliances_timeseries = hv.Curve(groupbyweekday(element),label=f'{title} by Weekdays').opts(color=color)
-                xlab = 'Weekdays'  
-            else:
-                appliances_timeseries = hv.Curve(groupbyperiods(element),label=f'{title} by Periods of Day').opts(color=color)
-                xlab = 'Periods of day'   
+    if box2 == 'by day': 
+        dw = hv.Curve(df['Dishwasher'].resample('D').mean(),label="Dishwasher Time-Series by Day").opts(color="red")
+        ho = hv.Curve(df['Home office'].resample('D').mean(),label="Home office Time-Series by Day").opts(color="blue")
+        fr = hv.Curve(df['Fridge'].resample('D').mean(),label="Fridge Time-Series by Day").opts(color="orange")
+        wc = hv.Curve(df['Wine cellar'].resample('D').mean(),label="Wine cellar Time-Series by Day").opts(color="green")
+        gd = hv.Curve(df['Garage door'].resample('D').mean(),label="Garage door Time-Series by Day").opts(color="purple")
+        ba = hv.Curve(df['Barn'].resample('D').mean(),label="Barn Time-Series by Day").opts(color="grey")
+        we = hv.Curve(df['Well'].resample('D').mean(),label="Well Time-Series by Day").opts(color="coral")
+        mcr = hv.Curve(df['Microwave'].resample('D').mean(),label="Microwave Time-Series by Day").opts(color="yellow")
+        lr = hv.Curve(df['Living room'].resample('D').mean(),label="Living room Time-Series by Day").opts(color="brown")
+        fu = hv.Curve(df['Furnace'].resample('D').mean(),label="Furnace Time-Series by Day").opts(color="skyblue")
+        ki = hv.Curve(df['Kitchen'].resample('D').mean(),label="Kitchen Time-Series by Day").opts(color="lightgreen")
+        xlab="Day"
+    elif box2 == 'by month':
+        dw = hv.Curve(groupbymonth('Dishwasher'),label="Dishwasher Time-Series by Month").opts(color="red")
+        ho = hv.Curve(groupbymonth('Home office'),label="Home office Time-Series by Month").opts(color="blue")
+        fr = hv.Curve(groupbymonth('Fridge'),label="Fridge Time-Series by Month").opts(color="orange")
+        wc = hv.Curve(groupbymonth('Wine cellar'),label="Wine cellar Time-Series by Month").opts(color="green")
+        gd = hv.Curve(groupbymonth('Garage door'),label="Garage door Time-Series by Month").opts(color="purple")
+        ba = hv.Curve(groupbymonth('Barn'),label="Barn Time-Series by Month").opts(color="grey")
+        we = hv.Curve(groupbymonth('Well'),label="Well Time-Series by Month").opts(color="pink")
+        mcr = hv.Curve(groupbymonth('Microwave'),label="Microwave Time-Series by Month").opts(color="yellow")
+        lr = hv.Curve(groupbymonth('Living room'),label="Living room Time-Series by Month").opts(color="brown")
+        fu = hv.Curve(groupbymonth('Furnace'),label="Furnace Time-Series by Month").opts(color="skyblue")
+        ki = hv.Curve(groupbymonth('Kitchen'),label="Kitchen Time-Series by Month").opts(color="lightgreen")
+        xlab="Month"
+    elif box2 == 'by weekdays':
+        dw = hv.Curve(groupbyweekday('Dishwasher'),label="Dishwasher Time-Series by Weekday").opts(color="red")
+        ho = hv.Curve(groupbyweekday('Home office'),label="Home office Time-Series by Weekday").opts(color="blue")
+        fr = hv.Curve(groupbyweekday('Fridge'),label="FridgeTime-Series by Weekday").opts(color="orange")
+        wc = hv.Curve(groupbyweekday('Wine cellar'),label="Wine cellar Time-Series by Weekday").opts(color="green")
+        gd = hv.Curve(groupbyweekday('Garage door'),label="Garage door Time-Series by Weekday").opts(color="purple")
+        ba = hv.Curve(groupbyweekday('Barn'),label="Barn Time-Series by Weekday").opts(color="grey")
+        we = hv.Curve(groupbyweekday('Well'),label="Well Time-Series by Weekday").opts(color="pink")
+        mcr = hv.Curve(groupbyweekday('Microwave'),label="Microwave Time-Series by Weekday").opts(color="yellow")
+        lr = hv.Curve(groupbyweekday('Living room'),label="Living room Time-Series by Weekday").opts(color="brown")
+        fu = hv.Curve(groupbyweekday('Furnace'),label="Furnace Time-Series by Weekday").opts(color="skyblue")
+        ki = hv.Curve(groupbyweekday('Kitchen'),label="Kitchen Time-Series by Weekday").opts(color="lightgreen")
+        xlab="Weekdays"
+    else:
+        dw = hv.Curve(groupbyweekday('Dishwasher'),label="Dishwasher Time-Series by Weekday").opts(color="red")
+        ho = hv.Curve(groupbyweekday('Home office'),label="Home office Time-Series by Weekday").opts(color="blue")
+        fr = hv.Curve(groupbyweekday('Fridge'),label="FridgeTime-Series by Weekday").opts(color="orange")
+        wc = hv.Curve(groupbyweekday('Wine cellar'),label="Wine cellar Time-Series by Weekday").opts(color="green")
+        gd = hv.Curve(groupbyweekday('Garage door'),label="Garage door Time-Series by Weekday").opts(color="purple")
+        ba = hv.Curve(groupbyweekday('Barn'),label="Barn Time-Series by Weekday").opts(color="grey")
+        we = hv.Curve(groupbyweekday('Well'),label="Well Time-Series by Weekday").opts(color="pink")
+        mcr = hv.Curve(groupbyweekday('Microwave'),label="Microwave Time-Series by Weekday").opts(color="yellow")
+        lr = hv.Curve(groupbyweekday('Living room'),label="Living room Time-Series by Weekday").opts(color="brown")
+        fu = hv.Curve(groupbyweekday('Furnace'),label="Furnace Time-Series by Weekday").opts(color="skyblue")
+        ki = hv.Curve(groupbyweekday('Kitchen'),label="Kitchen Time-Series by Weekday").opts(color="lightgreen")
+        xlab="Periods of day"
         
-    appliances_timeseries.opts(opts.Curve(xrotation=30, xlabel=xlab, ylabel="Energy Consumption", line_width=0.75, yformatter='%.2fkw' , width=600, height=400, tools=['hover'], show_grid=True))   
-    st.bokeh_chart(hv.render(appliances_timeseries, backend='bokeh'))    
+        appliances_timeseries = dw + ho + fr + wc + gd + ba + we + mcr + lr + fu + ki
+        appliances_timeseries.opts(opts.Curve(xlabel=xlab, line_width=0.75, ylabel="Energy Consumption", yformatter='%.2fkw' ,
+                                                                               width=500, height=400,tools=['hover'],show_grid=True)).cols(3)
+        st.bokeh_chart(hv.render(appliances_timeseries, backend='bokeh'))
     
     
 def dist_appl():
