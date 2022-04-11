@@ -242,9 +242,9 @@ if option == 'Energy Management Dashboard':
     st.dataframe(df)
     
     st.subheader("Average energy consumption")
+    radio1_names = ['per day', 'per month']
     genre = st.radio(
-     "Plot average energy consumption",
-     ('per day', 'per month'))
+     "Plot average energy consumption", radio1_names, index=0)
     avg_econ_t()
     #st.expander
 
@@ -265,10 +265,10 @@ if option == 'Energy Management Dashboard':
     appl_ts()
     
 #     st.subheader("Weather Information Time-Series")
+#     radio2_names = ['temperature', 'apparent_temperature', 'humidity', 'visibility', 'pressure', 
+#           'windspeed', 'windbearing', 'precipitation_intensity', 'dewpoint', 'precipitation_probability']
 #     box3 = st.radio(
-#      "select which weather element should be distributed?",
-#      ('temperature', 'apparent_temperature', 'humidity', 'visibility', 'pressure', 
-#           'windspeed', 'windbearing', 'precipitation_intensity', 'dewpoint', 'precipitation_probability'))
+#      "select which weather element should be distributed?", radio2_names, index=0)
 #     st.write("You've selected", box3, "time-series")    
         
 #     st.subheader("Energy Consumption of Appliances Distribution")
@@ -281,10 +281,10 @@ if option == 'Energy Management Dashboard':
     atem_vscon()
     
     st.subheader("Weather element distribution")
+    radio3_names = ['temperature', 'apparent_temperature', 'humidity', 'visibility', 'pressure', 
+          'windspeed', 'windbearing', 'precipitation_intensity', 'dewpoint', 'precipitation_probability']
     box5 = st.radio(
-     "select which weather element should be distributed?",
-     ('temperature', 'apparent_temperature', 'humidity', 'visibility', 'pressure', 
-          'windspeed', 'windbearing', 'precipitation_intensity', 'dewpoint', 'precipitation_probability'))
+     "select which weather element should be distributed?", radio3_names)
     st.write("You've selected", box5, "distribution")
     weat_dist()
     
