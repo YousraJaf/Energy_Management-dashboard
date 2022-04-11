@@ -224,22 +224,22 @@ def atem_vscon():
     st.bokeh_chart(hv.render(scatter, backend='bokeh')) 
     
     
-weather_elements = ['humidity','visibility', 'pressure', 'windspeed', 'windbearing', 'precipitation_intensity', 'dewpoint', 'precipitation_probability', 
-                    'apparent_temperature', 'temperature']
-colors = ["red", "orange", "blue", "yellow", "green", "grey", "purple", "pink", "skyblue", "lightgreen"]
-def weat_dist():
-    for index in range(len(weather_elements)):
-        e = weather_elements[index] 
-        c = colors[index] 
-        t = f'{weather_elements[index]} distribution'
-        if e == box5:
-            element = e
-            color = c
-            title = t
+# weather_elements = ['humidity','visibility', 'pressure', 'windspeed', 'windbearing', 'precipitation_intensity', 'dewpoint', 'precipitation_probability', 
+#                     'apparent_temperature', 'temperature']
+# colors = ["red", "orange", "blue", "yellow", "green", "grey", "purple", "pink", "skyblue", "lightgreen"]
+# def weat_dist():
+#     for index in range(len(weather_elements)):
+#         e = weather_elements[index] 
+#         c = colors[index] 
+#         t = f'{weather_elements[index]} distribution'
+#         if e == box5:
+#             element = e
+#             color = c
+#             title = t
         
-    weatherelement_dist = hv.Distribution(df[element]).opts(color=color, title=title)
-    weatherelement_dist.opts(opts.Distribution(xlabel="Values", ylabel="Density", width=600, height=400, tools=['hover'],show_grid=True))   
-    st.bokeh_chart(hv.render(weatherelement_dist, backend='bokeh'))
+#     weatherelement_dist = hv.Distribution(df[element]).opts(color=color, title=title)
+#     weatherelement_dist.opts(opts.Distribution(xlabel="Values", ylabel="Density", width=600, height=400, tools=['hover'],show_grid=True))   
+#     st.bokeh_chart(hv.render(weatherelement_dist, backend='bokeh'))
     
     
 
