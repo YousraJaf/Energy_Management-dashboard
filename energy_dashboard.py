@@ -156,10 +156,10 @@ def appl_ts():
         ki = hv.Curve(groupbyweekday('Kitchen'),label="Kitchen Time-Series by Weekday").opts(color="lightgreen")
         xlab="Periods of day"
         
-        appliances_timeseries = dw + ho + fr + wc + gd + ba + we + mcr + lr + fu + ki
-        appliances_timeseries.opts(opts.Curve(xlabel=xlab, line_width=0.75, ylabel="Energy Consumption", yformatter='%.2fkw' ,
-                                                                               width=500, height=400,tools=['hover'],show_grid=True)).cols(3)
-        st.bokeh_chart(hv.render(appliances_timeseries, backend='bokeh'))
+    appliances_timeseries = dw + ho + fr + wc + gd + ba + we + mcr + lr + fu + ki
+    appliances_timeseries.opts(opts.Curve(xlabel=xlab, line_width=0.75, ylabel="Energy Consumption", yformatter='%.2fkw' ,
+                                                                           width=500, height=400,tools=['hover'],show_grid=True)).cols(3)
+    st.bokeh_chart(hv.render(appliances_timeseries, backend='bokeh'))
     
     
 def dist_appl():
