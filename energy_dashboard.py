@@ -175,17 +175,17 @@ def appl_ts():
         ki = hv.Curve(groupbyweekday('Kitchen'),label="Kitchen Time-Series by Weekday").opts(color="lightgreen")
         xlab="Weekdays"
     else:
-        dw = hv.Curve(groupbyweekday('Dishwasher'),label="Dishwasher Time-Series by Weekday").opts(color="red")
-        ho = hv.Curve(groupbyweekday('Home office'),label="Home office Time-Series by Weekday").opts(color="blue")
-        fr = hv.Curve(groupbyweekday('Fridge'),label="FridgeTime-Series by Weekday").opts(color="orange")
-        wc = hv.Curve(groupbyweekday('Wine cellar'),label="Wine cellar Time-Series by Weekday").opts(color="green")
-        gd = hv.Curve(groupbyweekday('Garage door'),label="Garage door Time-Series by Weekday").opts(color="purple")
-        ba = hv.Curve(groupbyweekday('Barn'),label="Barn Time-Series by Weekday").opts(color="grey")
-        we = hv.Curve(groupbyweekday('Well'),label="Well Time-Series by Weekday").opts(color="pink")
-        mcr = hv.Curve(groupbyweekday('Microwave'),label="Microwave Time-Series by Weekday").opts(color="yellow")
-        lr = hv.Curve(groupbyweekday('Living room'),label="Living room Time-Series by Weekday").opts(color="brown")
-        fu = hv.Curve(groupbyweekday('Furnace'),label="Furnace Time-Series by Weekday").opts(color="skyblue")
-        ki = hv.Curve(groupbyweekday('Kitchen'),label="Kitchen Time-Series by Weekday").opts(color="lightgreen")
+        dw = hv.Curve(groupbyperiods('Dishwasher'),label="Dishwasher Time-Series by Timing").opts(color="red")
+        ho = hv.Curve(groupbyperiods('Home office'),label="Home office Time-Series by Timing").opts(color="blue")
+        fr = hv.Curve(groupbyperiods('Fridge'),label="FridgeTime-Series by Timing").opts(color="orange")
+        wc = hv.Curve(groupbyperiods('Wine cellar'),label="Wine cellar Time-Series by Timing").opts(color="green")
+        gd = hv.Curve(groupbyperiods('Garage door'),label="Garage door Time-Series by Timing").opts(color="purple")
+        ba = hv.Curve(groupbyperiods('Barn'),label="Barn Time-Series by Timing").opts(color="grey")
+        we = hv.Curve(groupbyperiods('Well'),label="Well Time-Series by Timing").opts(color="pink")
+        mcr = hv.Curve(groupbyperiods('Microwave'),label="Microwave Time-Series by Timing").opts(color="yellow")
+        lr = hv.Curve(groupbyperiods('Living room'),label="Living room Time-Series by Timing").opts(color="brown")
+        fu = hv.Curve(groupbyperiods('Furnace'),label="Furnace Time-Series by Timing").opts(color="skyblue")
+        ki = hv.Curve(groupbyperiods('Kitchen'),label="Kitchen Time-Series by Timing").opts(color="lightgreen")
         xlab="Periods of day"
         
     appliances_timeseries = dw + ho + fr + wc + gd + ba + we + mcr + lr + fu + ki
