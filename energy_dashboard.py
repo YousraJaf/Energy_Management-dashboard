@@ -66,7 +66,7 @@ def tsday_congen():
     line2 = hv.Curve(gen).opts(title="Total Energy Generation Time-Series by Day", color="blue", ylabel="Energy Generation")
     
     mult_line_plot = line1 + line2
-    mult_line_plot.opts(opts.Curve(xlabel="Time", yformatter='%.2fkw', width=500, height=300, line_width=0.60, tools=['hover'], show_grid=True,fontsize={'title':11}))
+    mult_line_plot.opts(opts.Curve(xlabel="Time", yformatter='%.2fkw', width=600, height=400, line_width=0.60, tools=['hover'], show_grid=True,fontsize={'title':11}))
     st.bokeh_chart(hv.render(mult_line_plot, backend='bokeh'))
     
 def groupbymonth(col):
@@ -96,15 +96,15 @@ def ts_congen():
         gen = hv.Curve(groupbymonth('Sol_gen')).opts(title="Total Energy Generation Time-Series by Month", color="blue", ylabel="Energy Generation")
         xlab = "Month"
     elif box1 == 'by weekdays':
-        use = hv.Curve(groupbyweekday('HO_use')).opts(title="Total Energy Consumption Time-Series by Month", color="red", ylabel="Energy Consumption")
-        gen = hv.Curve(groupbyweekday('Sol_gen')).opts(title="Total Energy Generation Time-Series by Month", color="blue", ylabel="Energy Generation")
+        use = hv.Curve(groupbyweekday('HO_use')).opts(title="Total Energy Consumption Time-Series by Weekdays", color="red", ylabel="Energy Consumption")
+        gen = hv.Curve(groupbyweekday('Sol_gen')).opts(title="Total Energy Generation Time-Series by Weekdays", color="blue", ylabel="Energy Generation")
         xlab = "Weekdays"
     else:
         use = hv.Curve(groupbyperiods('HO_use')).opts(title="Total Energy Consumption Time-Series by Periods of day", color="red", ylabel="Energy Consumption")
         gen = hv.Curve(groupbyperiods('Sol_gen')).opts(title="Total Energy Generation Time-Series by Periods of day", color="blue", ylabel="Energy Generation")
         xlab = "Periods of day"
     line = use + gen
-    line.opts(opts.Curve(xrotation = 90, xlabel=xlab, yformatter='%.2fkw', width=400, height=300,tools=['hover'],show_grid=True,fontsize={'title':10}))
+    line.opts(opts.Curve(xrotation = 90, xlabel=xlab, yformatter='%.2fkw', width=600, height=400,tools=['hover'],show_grid=True,fontsize={'title':10}))
     st.bokeh_chart(hv.render(line, backend='bokeh'))
     
 
@@ -134,7 +134,7 @@ def appl_ts():
                 xlab = 'Periods of day'   
         
     appliances_timeseries.opts(opts.Curve(xrotation=30, xlabel=xlab, ylabel="Energy Consumption", line_width=0.75, yformatter='%.2fkw' , width=600, height=400, tools=['hover'], show_grid=True))   
-    st.bokeh_chart(hv.render(appliances_timeseriesopts, backend='bokeh'))    
+    st.bokeh_chart(hv.render(appliances_timeseries, backend='bokeh'))    
     
     
 def dist_appl():
@@ -229,7 +229,7 @@ if option == 'Energy Management Dashboard':
     ts_congen()
     
     st.subheader("Rooms and Appliances Time-Series")
-    st.write("select rooms and appliances Time-Series by day, month, weekdays or periods of day")
+    st.write("select rooms and appliances Time-Series by day, month, weekdays or periods of day:")
     box2 = st.selectbox(
      'select items',
      ('by day', 'by month', 'by weekdays', 'by periods of day'))
