@@ -162,36 +162,23 @@ def appl_ts():
     st.bokeh_chart(hv.render(appliances_timeseries, backend='bokeh'))
     
     
-def dist_appl():
-    hopd = hv.Distribution(df[df['Home office']<1.1]['Home office'], label="Home office").opts(color="blue")
-    wcpd = hv.Distribution(df[df['Wine cellar']<1.1]['Wine cellar'], label="Wine cellar").opts(color="green")
-    bpd = hv.Distribution(df[df['Barn']<1.1]['Barn'], label="Barn").opts(color="grey")
-    lrpd = hv.Distribution(df[df['Living room']<1.1]['Living room'], label="Living room").opts(color="brown")
-    kpd = hv.Distribution(df[df['Kitchen']<1.1]['Kitchen'], label="Kitchen").opts(color="lightgreen")
-    dwpd = hv.Distribution(df[df['Dishwasher']<1.1]['Dishwasher'], label="Dishwasher").opts(color="red")
-    fpd = hv.Distribution(df[df['Furnace']<1.1]['Furnace'], label="Furnace").opts(color="skyblue")
-    frpd = hv.Distribution(df[df['Fridge']<1.1]['Fridge'], label="Fridge Distribution").opts(color="orange")
-    gdpd = hv.Distribution(df[df['Garage door']<1.1]['Garage door'], label="Garage door").opts(color="purple")
-    wpd = hv.Distribution(df[df['Well']<1.1]['Well'], label="Well").opts(color="pink")
-    mcrpd = hv.Distribution(df[df['Microwave']<1.1]['Microwave'], label="Microwave").opts(color="yellow")
+# def dist_appl():
+#     hopd = hv.Distribution(df[df['Home office']<1.1]['Home office'], label="Home office").opts(color="blue")
+#     wcpd = hv.Distribution(df[df['Wine cellar']<1.1]['Wine cellar'], label="Wine cellar").opts(color="green")
+#     bpd = hv.Distribution(df[df['Barn']<1.1]['Barn'], label="Barn").opts(color="grey")
+#     lrpd = hv.Distribution(df[df['Living room']<1.1]['Living room'], label="Living room").opts(color="brown")
+#     kpd = hv.Distribution(df[df['Kitchen']<1.1]['Kitchen'], label="Kitchen").opts(color="lightgreen")
+#     dwpd = hv.Distribution(df[df['Dishwasher']<1.1]['Dishwasher'], label="Dishwasher").opts(color="red")
+#     fpd = hv.Distribution(df[df['Furnace']<1.1]['Furnace'], label="Furnace").opts(color="skyblue")
+#     frpd = hv.Distribution(df[df['Fridge']<1.1]['Fridge'], label="Fridge Distribution").opts(color="orange")
+#     gdpd = hv.Distribution(df[df['Garage door']<1.1]['Garage door'], label="Garage door").opts(color="purple")
+#     wpd = hv.Distribution(df[df['Well']<1.1]['Well'], label="Well").opts(color="pink")
+#     mcrpd = hv.Distribution(df[df['Microwave']<1.1]['Microwave'], label="Microwave").opts(color="yellow")
     
-    distribution = hopd * wcpd * bpd * lrpd * kpd * dwpd * fpd * frpd * gdpd * wpd * mcrpd
-    distribution.opts(opts.Distribution(xlabel="Energy Consumption", ylabel="Density", xformatter='%.2fkw',title='Energy Consumption of Appliances Distribution', width=800, height=350,tools=['hover'],show_grid=True))
-    st.bokeh_chart(hv.render(distribution, backend='bokeh'))
+#     distribution = hopd * wcpd * bpd * lrpd * kpd * dwpd * fpd * frpd * gdpd * wpd * mcrpd
+#     distribution.opts(opts.Distribution(xlabel="Energy Consumption", ylabel="Density", xformatter='%.2fkw',title='Energy Consumption of Appliances Distribution', width=800, height=350,tools=['hover'],show_grid=True))
+#     st.bokeh_chart(hv.render(distribution, backend='bokeh'))
 
-
-def energy_dist():
-    if option1 == 'rooms':
-        df_sub = df.filter(items=['Home office', 'Wine cellar', 'Barn', 'Living room', 'Kitchen'])
-    elif option1 == 'devices':    
-        df_sub = df.filter(items=['Dishwasher', 'Furnace',  'Fridge', 'Garage door', 'Well', 'Microwave'])
-    else:
-        df_sub = df.filter(items=['Home office', 'Wine cellar', 'Barn', 'Living room', 'Kitchen', 'Dishwasher', 'Furnace',  'Fridge', 'Garage door', 'Well', 'Microwave'])
-
-    sub_sum = pd.DataFrame(df_sub.sum(axis=0), columns=['total_energy_consumption'])
-    bar_chart = hv.Bars(sub_sum)
-    bar_chart.opts(xrotation=90, width=600, height=400, xlabel=f'{option}', ylabel='Consumption [kWh]', title=f'Total Consumption by all {option} in [kWh] from 2014-2016' )    
-    st.bokeh_chart(hv.render(bar_chart, backend='bokeh'))
 
 prox = [df_day, df_month]
 def atem_vscon():
@@ -221,6 +208,22 @@ def weat_dist():
     weatherelement_dist = hv.Distribution(df[element]).opts(color=color, title=title)
     weatherelement_dist.opts(opts.Distribution(xlabel="Values", ylabel="Density", width=600, height=400, tools=['hover'],show_grid=True))   
     st.bokeh_chart(hv.render(weatherelement_dist, backend='bokeh'))
+    
+    
+
+def energy_dist():
+    if option1 == 'rooms':
+        df_sub = df.filter(items=['Home office', 'Wine cellar', 'Barn', 'Living room', 'Kitchen'])
+    elif option1 == 'devices':    
+        df_sub = df.filter(items=['Dishwasher', 'Furnace',  'Fridge', 'Garage door', 'Well', 'Microwave'])
+    else:
+        df_sub = df.filter(items=['Home office', 'Wine cellar', 'Barn', 'Living room', 'Kitchen', 'Dishwasher', 'Furnace',  'Fridge', 'Garage door', 'Well', 'Microwave'])
+
+    sub_sum = pd.DataFrame(df_sub.sum(axis=0), columns=['total_energy_consumption'])
+    bar_chart = hv.Bars(sub_sum)
+    bar_chart.opts(xrotation=90, width=600, height=400, xlabel=f'{option}', ylabel='Consumption [kWh]', title=f'Total Consumption by all {option} in [kWh] from 2014-2016' )    
+    st.bokeh_chart(hv.render(bar_chart, backend='bokeh'))
+    
 
 
 ######################################################################################################################################################
@@ -268,8 +271,8 @@ if option == 'Energy Management Dashboard':
 #           'windspeed', 'windbearing', 'precipitation_intensity', 'dewpoint', 'precipitation_probability'))
 #     st.write("You've selected", box3, "time-series")    
         
-    st.subheader("Energy Consumption of Appliances Distribution")
-    dist_appl()
+#     st.subheader("Energy Consumption of Appliances Distribution")
+#     dist_appl()
     
     st.subheader("Relation between apparent Temperature and Household overall energy consumption")
     box4 = st.selectbox('select by?',
@@ -284,13 +287,6 @@ if option == 'Energy Management Dashboard':
           'windspeed', 'windbearing', 'precipitation_intensity', 'dewpoint', 'precipitation_probability'))
     st.write("You've selected", box5, "distribution")
     weat_dist()
-    
-#     options = st.multiselect(
-#      'What are your favorite colors',
-#      ['Green', 'Yellow', 'Red', 'Blue'],
-#      ['Yellow', 'Red'])
-
-#     st.write('You selected:', options)
     
     st.subheader("Total Energy Consumption Distribution")
     option1 = st.radio(
