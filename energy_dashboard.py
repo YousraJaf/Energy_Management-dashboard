@@ -7,6 +7,96 @@ hv.extension('bokeh')
 st.set_option('deprecation.showPyplotGlobalUse', False)
 option = st.sidebar.selectbox("Which Dashboard?", ('Energy Management Dashboard', 'Machine Learning'))
 
+###
+# path1 = 'smart-meter-data/2014/'
+# path2 = 'smart-meter-data/2015/'
+# path3 = 'smart-meter-data/2016/'
+
+# smarthome14 = pd.read_csv(path1 + 'Home-meter1_2014.csv')
+# weather14 = pd.read_csv(path1 + '../home2014.csv')
+# smarthome15 = pd.read_csv(path2 + 'Home-meter1_2015.csv')
+# weather15 = pd.read_csv(path2 + '../home2015.csv')
+# smarthome16 = pd.read_csv(path3 + 'Home-meter1_2016.csv')
+# weather16 = pd.read_csv(path3 + '../home2016.csv')
+
+# smarthome14['Date & Time'] = pd.to_datetime(smarthome14['Date & Time'])
+# smarthome14 = smarthome14.groupby(pd.Grouper(key="Date & Time", freq="1H")).mean().reset_index()
+
+# smarthome15['Date & Time'] = pd.to_datetime(smarthome15['Date & Time'])
+# smarthome15 = smarthome15.groupby(pd.Grouper(key="Date & Time", freq="1H")).mean().reset_index()
+
+# smarthome16['Date & Time'] = pd.to_datetime(smarthome16['Date & Time'])
+# smarthome16 = smarthome16.groupby(pd.Grouper(key="Date & Time", freq="1H")).mean().reset_index()
+
+# smarthome_frames = [smarthome14, smarthome15, smarthome16]
+# smarthome = pd.concat(smarthome_frames)
+
+# #smarthome[smarthome.isnull().any(axis=1)]
+# smarthome.drop([1610, 1586, 1730], inplace=True)
+
+# weather14['Date & Time'] = pd.to_datetime(weather14['time'],unit='s')
+# weather15['Date & Time'] = pd.to_datetime(weather15['time'],unit='s')
+# weather16['Date & Time'] = pd.to_datetime(weather16['time'],unit='s')
+
+# weather_frames = [weather14, weather15, weather16]
+# weather = pd.concat(weather_frames)
+
+# #weather.isna().sum().reset_index(name="missing_value").plot.bar(x='index', y='missing_value', rot=90, color='red')
+
+# weather['cloudCover'].replace(['cloudCover'], method='bfill', inplace=True)
+# weather['cloudCover'] = weather['cloudCover'].astype('float')
+# # weather.drop(['cloudCover'], axis=1, inplace=True)
+
+# ## Let's convert temperature and apparent temperature units to degrees Celsius (°C)
+# def fahr_to_celsius(temp_fahr):
+#     """Convert Fahrenheit to Celsius
+    
+#     Return Celsius conversion of input"""
+#     temp_celsius = (temp_fahr - 32) * 5 / 9
+#     return temp_celsius
+
+# weather['apparentTemperature_Celsius'] = fahr_to_celsius(weather['apparentTemperature'])
+# weather['temperature_Celsius'] = fahr_to_celsius(weather['temperature'])
+# weather.drop(['apparentTemperature', 'temperature'], axis=1, inplace=True)
+
+# df = pd.merge(smarthome, weather, on="Date & Time")
+
+# ## Ensuring there are no temporal gaps
+# import matplotlib.pyplot as plt
+
+# plt.figure(figsize=(10,5))
+# df['Date & Time'].plot() 
+# plt.xlabel('Reading Count')
+# plt.ylabel('Date')
+# plt.savefig('timestamp.pdf')
+# plt.show()
+
+# df.dropna(inplace=True)
+
+# ## change column names:
+# for col in df.columns:
+#     df.rename(columns={col:col.replace(' [kW]', '')}, inplace=True)
+    
+# ## a little feature engineering!
+# df['Furnace'] = df[['Furnace 1', 'Furnace 2']].sum(axis=1)
+# df['Kitchen'] = df[['Kitchen 12', 'Kitchen 14', 'Kitchen 38']].sum(axis=1)
+# df.drop(['Furnace 1','Furnace 2','Kitchen 12','Kitchen 14','Kitchen 38', 'time'], axis=1, inplace=True)
+
+# ## correlation between columns
+# df_corr = df.corr()
+
+# # corr_heatmap = hv.HeatMap((df_corr.columns, df_corr.index, df_corr > 0.95))
+# # corr_heatmap.opts(tools=['hover'], width=1200, height=500, title='Correlation Heatmap', xrotation = 90, colorbar=True, clim=(-1, 1), invert_yaxis=True)
+# # corr_heatmap * hv.Labels(corr_heatmap).opts(text_color='white')
+
+# ## from the correlation heatmap we can see, 'use' - 'House overall' and 'gen' and 'Solar' columns' correlation coefficient is almost over 0.95, 
+# ## so we can consider only one of them and delete the other one.
+# df['HO_use'] = df['use']
+# df['Sol_gen'] = df['gen']
+# df.drop(['use','House overall','gen','Solar'], axis=1, inplace=True)
+
+###
+
 #read data
 df = pd.read_csv('df.csv')
 df['Date & Time'] = pd.to_datetime(df['Date & Time'])
