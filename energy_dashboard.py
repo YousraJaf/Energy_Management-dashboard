@@ -5,9 +5,10 @@ from holoviews import opts
 hv.extension('bokeh')
 
 st.set_option('deprecation.showPyplotGlobalUse', False)
-option = st.sidebar.selectbox("Which Dashboard?", ('Energy Management Dashboard', 'Machine Learning'))
+option = st.sidebar.selectbox("Which Dashboard?", ('Energy Management Dashboard', 'Usage by rooms and appliances', 'Anticipate next month’s consumption'))
 
 ###
+#read data
 path1 = 'smart-meter-data/2014/'
 path2 = 'smart-meter-data/2015/'
 path3 = 'smart-meter-data/2016/'
@@ -19,6 +20,7 @@ weather15 = pd.read_csv(path2 + '../home2015.csv')
 smarthome16 = pd.read_csv(path3 + 'Home-meter1_2016.csv')
 weather16 = pd.read_csv(path3 + '../home2016.csv')
 
+# converting half hourly or minutely data to hourly data
 smarthome14['Date & Time'] = pd.to_datetime(smarthome14['Date & Time'])
 smarthome14 = smarthome14.groupby(pd.Grouper(key="Date & Time", freq="1H")).mean().reset_index()
 
@@ -34,6 +36,7 @@ smarthome = pd.concat(smarthome_frames)
 #smarthome[smarthome.isnull().any(axis=1)]
 smarthome.drop([1610, 1586, 1730], inplace=True)
 
+# convert unix timestamp to datetime
 weather14['Date & Time'] = pd.to_datetime(weather14['time'],unit='s')
 weather15['Date & Time'] = pd.to_datetime(weather15['time'],unit='s')
 weather16['Date & Time'] = pd.to_datetime(weather16['time'],unit='s')
@@ -43,6 +46,7 @@ weather = pd.concat(weather_frames)
 
 #weather.isna().sum().reset_index(name="missing_value").plot.bar(x='index', y='missing_value', rot=90, color='red')
 
+# deal with missing values
 weather['cloudCover'].replace(['cloudCover'], method='bfill', inplace=True)
 weather['cloudCover'] = weather['cloudCover'].astype('float')
 # weather.drop(['cloudCover'], axis=1, inplace=True)
@@ -59,21 +63,23 @@ weather['apparentTemperature_Celsius'] = fahr_to_celsius(weather['apparentTemper
 weather['temperature_Celsius'] = fahr_to_celsius(weather['temperature'])
 weather.drop(['apparentTemperature', 'temperature'], axis=1, inplace=True)
 
+# finally merge the smarthome and weather data
 df = pd.merge(smarthome, weather, on="Date & Time")
 
 # ## Ensuring there are no temporal gaps
 # import matplotlib.pyplot as plt
 
+
 # plt.figure(figsize=(10,5))
 # df['Date & Time'].plot() 
 # plt.xlabel('Reading Count')
 # plt.ylabel('Date')
-# plt.savefig('timestamp.pdf')
 # plt.show()
+# st.line_chart(data=df['Date & Time'], width=300, height=400, use_container_width=True)
 
 df.dropna(inplace=True)
 
-## change column names:
+## consumption unit is converted into 'kWh' from 'kW', right the monent we aggregated hourly data, so let's drop column names:
 for col in df.columns:
     df.rename(columns={col:col.replace(' [kW]', '')}, inplace=True)
     
@@ -82,8 +88,8 @@ df['Furnace'] = df[['Furnace 1', 'Furnace 2']].sum(axis=1)
 df['Kitchen'] = df[['Kitchen 12', 'Kitchen 14', 'Kitchen 38']].sum(axis=1)
 df.drop(['Furnace 1','Furnace 2','Kitchen 12','Kitchen 14','Kitchen 38', 'time'], axis=1, inplace=True)
 
-# ## correlation between columns
-# df_corr = df.corr()
+## correlation between columns
+df_corr = df.corr()
 
 # # corr_heatmap = hv.HeatMap((df_corr.columns, df_corr.index, df_corr > 0.95))
 # # corr_heatmap.opts(tools=['hover'], width=1200, height=500, title='Correlation Heatmap', xrotation = 90, colorbar=True, clim=(-1, 1), invert_yaxis=True)
@@ -97,8 +103,6 @@ df.drop(['use','House overall','gen','Solar'], axis=1, inplace=True)
 
 ###
 
-#read data
-#df = pd.read_csv('df.csv')
 df['Date & Time'] = pd.to_datetime(df['Date & Time'])
 
 df['year'] = df['Date & Time'].dt.year # df['year'] = df['Date & Time'].apply(lambda x : x.year)
@@ -220,116 +224,45 @@ def ts_congen():
     line.opts(opts.Curve(xrotation = 90, xlabel=xlab, yformatter='%.2fkw', width=600, height=400,tools=['hover'],show_grid=True,fontsize={'title':10}))
     st.bokeh_chart(hv.render(line, backend='bokeh'))
 
+    
+cols = ['Dishwasher', 'Home office', 'Fridge', 'Wine cellar', 'Garage door', 'Barn',  'Well', 'Microwave', 'Living room', 'Furnace', 'Kitchen']
+colors = ["red", "orange", "blue", "yellow", "green", "grey", "purple", "pink", "skyblue", "lightgreen", "brown"]
+
+curve_Items = ['dw', 'ho', 'fr', 'wc', 'gd', 'ba', 'we', 'mcr', 'lr', 'fu', 'ki']    
 def appl_ts():
-    if box2 == 'by day': 
-        dw = hv.Curve(df['Dishwasher'].resample('D').mean(),label="Dishwasher Time-Series by Day").opts(color="red")
-        ho = hv.Curve(df['Home office'].resample('D').mean(),label="Home office Time-Series by Day").opts(color="blue")
-        fr = hv.Curve(df['Fridge'].resample('D').mean(),label="Fridge Time-Series by Day").opts(color="orange")
-        wc = hv.Curve(df['Wine cellar'].resample('D').mean(),label="Wine cellar Time-Series by Day").opts(color="green")
-        gd = hv.Curve(df['Garage door'].resample('D').mean(),label="Garage door Time-Series by Day").opts(color="purple")
-        ba = hv.Curve(df['Barn'].resample('D').mean(),label="Barn Time-Series by Day").opts(color="grey")
-        we = hv.Curve(df['Well'].resample('D').mean(),label="Well Time-Series by Day").opts(color="coral")
-        mcr = hv.Curve(df['Microwave'].resample('D').mean(),label="Microwave Time-Series by Day").opts(color="yellow")
-        lr = hv.Curve(df['Living room'].resample('D').mean(),label="Living room Time-Series by Day").opts(color="brown")
-        fu = hv.Curve(df['Furnace'].resample('D').mean(),label="Furnace Time-Series by Day").opts(color="skyblue")
-        ki = hv.Curve(df['Kitchen'].resample('D').mean(),label="Kitchen Time-Series by Day").opts(color="lightgreen")
-        xlab="Day"
-    elif box2 == 'by month':
-        dw = hv.Curve(groupbymonth('Dishwasher'),label="Dishwasher Time-Series by Month").opts(color="red")
-        ho = hv.Curve(groupbymonth('Home office'),label="Home office Time-Series by Month").opts(color="blue")
-        fr = hv.Curve(groupbymonth('Fridge'),label="Fridge Time-Series by Month").opts(color="orange")
-        wc = hv.Curve(groupbymonth('Wine cellar'),label="Wine cellar Time-Series by Month").opts(color="green")
-        gd = hv.Curve(groupbymonth('Garage door'),label="Garage door Time-Series by Month").opts(color="purple")
-        ba = hv.Curve(groupbymonth('Barn'),label="Barn Time-Series by Month").opts(color="grey")
-        we = hv.Curve(groupbymonth('Well'),label="Well Time-Series by Month").opts(color="pink")
-        mcr = hv.Curve(groupbymonth('Microwave'),label="Microwave Time-Series by Month").opts(color="yellow")
-        lr = hv.Curve(groupbymonth('Living room'),label="Living room Time-Series by Month").opts(color="brown")
-        fu = hv.Curve(groupbymonth('Furnace'),label="Furnace Time-Series by Month").opts(color="skyblue")
-        ki = hv.Curve(groupbymonth('Kitchen'),label="Kitchen Time-Series by Month").opts(color="lightgreen")
-        xlab="Month"
-    elif box2 == 'by weekdays':
-        dw = hv.Curve(groupbyweekday('Dishwasher'),label="Dishwasher Time-Series by Weekday").opts(color="red")
-        ho = hv.Curve(groupbyweekday('Home office'),label="Home office Time-Series by Weekday").opts(color="blue")
-        fr = hv.Curve(groupbyweekday('Fridge'),label="FridgeTime-Series by Weekday").opts(color="orange")
-        wc = hv.Curve(groupbyweekday('Wine cellar'),label="Wine cellar Time-Series by Weekday").opts(color="green")
-        gd = hv.Curve(groupbyweekday('Garage door'),label="Garage door Time-Series by Weekday").opts(color="purple")
-        ba = hv.Curve(groupbyweekday('Barn'),label="Barn Time-Series by Weekday").opts(color="grey")
-        we = hv.Curve(groupbyweekday('Well'),label="Well Time-Series by Weekday").opts(color="pink")
-        mcr = hv.Curve(groupbyweekday('Microwave'),label="Microwave Time-Series by Weekday").opts(color="yellow")
-        lr = hv.Curve(groupbyweekday('Living room'),label="Living room Time-Series by Weekday").opts(color="brown")
-        fu = hv.Curve(groupbyweekday('Furnace'),label="Furnace Time-Series by Weekday").opts(color="skyblue")
-        ki = hv.Curve(groupbyweekday('Kitchen'),label="Kitchen Time-Series by Weekday").opts(color="lightgreen")
-        xlab="Weekdays"
-    else:
-        dw = hv.Curve(groupbyperiods('Dishwasher'),label="Dishwasher Time-Series by Timing").opts(color="red")
-        ho = hv.Curve(groupbyperiods('Home office'),label="Home office Time-Series by Timing").opts(color="blue")
-        fr = hv.Curve(groupbyperiods('Fridge'),label="FridgeTime-Series by Timing").opts(color="orange")
-        wc = hv.Curve(groupbyperiods('Wine cellar'),label="Wine cellar Time-Series by Timing").opts(color="green")
-        gd = hv.Curve(groupbyperiods('Garage door'),label="Garage door Time-Series by Timing").opts(color="purple")
-        ba = hv.Curve(groupbyperiods('Barn'),label="Barn Time-Series by Timing").opts(color="grey")
-        we = hv.Curve(groupbyperiods('Well'),label="Well Time-Series by Timing").opts(color="pink")
-        mcr = hv.Curve(groupbyperiods('Microwave'),label="Microwave Time-Series by Timing").opts(color="yellow")
-        lr = hv.Curve(groupbyperiods('Living room'),label="Living room Time-Series by Timing").opts(color="brown")
-        fu = hv.Curve(groupbyperiods('Furnace'),label="Furnace Time-Series by Timing").opts(color="skyblue")
-        ki = hv.Curve(groupbyperiods('Kitchen'),label="Kitchen Time-Series by Timing").opts(color="lightgreen")
-        xlab="Periods of day"
-        
-    appliances_timeseries = dw + ho + fr + wc + gd + ba + we + mcr + lr + fu + ki
-    appliances_timeseries.opts(opts.Curve(xlabel=xlab, line_width=0.75, ylabel="Energy Consumption", yformatter='%.2fkw' ,
-                                                                           width=500, height=400,tools=['hover'],show_grid=True)).cols(2)
-    st.bokeh_chart(hv.render(appliances_timeseries, backend='bokeh'))
-    
+    for items in range(len(cols)):
+        if box2 == 'by day':
+            curve_Items[items] = hv.Curve(df[cols[items]].resample('D').mean(),label=f"{cols[items]} Time-Series by Day").opts(color=colors[items])
+            #xlab="Day"
+        elif box2 == 'by month':
+            curve_Items[items] = hv.Curve(groupbymonth(cols[items]),label=f"{cols[items]} Time-Series by Month").opts(color=colors[items])
+            #xlab="Month"
+        elif box2 == 'by weekdays':
+            curve_Items[items] = hv.Curve(groupbyweekday(cols[items]),label=f"{cols[items]} Time-Series by Weekday").opts(color=colors[items])
+            #xlab="Weekdays"
+        else:
+            curve_Items[items] = hv.Curve(groupbyperiods(cols[items]),label=f"{cols[items]} Time-Series by Timing").opts(color=colors[items])
+            #xlab="Periods of day"
+    return curve_Items
+
+weather_element = ['apparent_temperature', 'humidity', 'visibility', 'pressure', 'windspeed', 'precipitation_intensity', 'dewpoint']
+ts_items = ['apTemp', 'hmd', 'vis', 'prs', 'wnd', 'prc', 'dew']
 def weather_ts():
-    if box3 == 'by day':
-        temp = hv.Curve(df['temperature'].resample('D').mean(),label="temperature").opts(color="red")
-        apTemp = hv.Curve(df['apparent_temperature'].resample('D').mean(),label="apparentTemperature").opts(color="orange")
-        temps = (temp * apTemp).opts(opts.Curve(title='Temperature Time-Series by Day')).opts(legend_position='top',legend_cols=2)
-        hmd = hv.Curve(df['humidity'].resample('D').mean()).opts(color="yellow", title='Humidity Time-Series by Day')
-        vis = hv.Curve(df['visibility'].resample('D').mean()).opts(color="blue", title='Visibility Time-Series by Day')
-        prs = hv.Curve(df['pressure'].resample('D').mean()).opts(color="green", title='Pressure Time-Series by Day')
-        wnd = hv.Curve(df['windspeed'].resample('D').mean()).opts(color="purple", title='Windspeed Time-Series by Day')
-        prc = hv.Curve(df['precipitation_intensity'].resample('D').mean()).opts(color="skyblue", title='Intensity of precipitation Time-Series by Day')
-        dew = hv.Curve(df['dewpoint'].resample('D').mean()).opts(color="lightgreen", title='Dewpoint Time-Series by Day')
-        xlab = "Day"
-    elif box3 == 'by month':
-        temp = hv.Curve(groupbymonth('temperature'),label="temperature").opts(color="red")
-        apTemp = hv.Curve(groupbymonth('apparent_temperature'),label="apparent_temperature").opts(color="orange")
-        temps = (temp * apTemp).opts(opts.Curve(title='Temperature Time-Series by Month')).opts(legend_position='top',legend_cols=2)
-        hmd = hv.Curve(groupbymonth('humidity'),label="Humidity Time-Series by Month").opts(color="yellow")
-        vis = hv.Curve(groupbymonth('visibility'),label="Visibility Time-Series by Month").opts(color="blue")
-        prs = hv.Curve(groupbymonth('pressure'),label="Pressure Time-Series by Month").opts(color="green")
-        wnd = hv.Curve(groupbymonth('windspeed'),label="Windspeed Time-Series by Month").opts(color="purple")
-        prc = hv.Curve(groupbymonth('precipitation_intensity'),label="Intensity of precipitation Time-Series by Month").opts(color="skyblue")
-        dew = hv.Curve(groupbymonth('dewpoint'),label="Dewpoint Time-Series by Month").opts(color="lightgreen")
-        xlab = "Months"
-    elif box3 == 'by weekdays':
-        temp = hv.Curve(groupbyweekday('temperature'),label="temperature").opts(color="red")
-        apTemp = hv.Curve(groupbyweekday('apparent_temperature'),label="apparent_temperature").opts(color="orange")
-        temps = (temp * apTemp).opts(opts.Curve(title='Temperature Time-Series by Weekdays')).opts(legend_position='top',legend_cols=2)
-        hmd = hv.Curve(groupbyweekday('humidity'),label="Humidity Time-Series by Weekdays").opts(color="brown")
-        vis = hv.Curve(groupbyweekday('visibility'),label="Visibility Time-Series by Weekdays").opts(color="blue")
-        prs = hv.Curve(groupbyweekday('pressure'),label="Pressure Time-Series by Weekdays").opts(color="green")
-        wnd = hv.Curve(groupbyweekday('windspeed'),label="Windspeed Time-Series by Weekdays").opts(color="purple")
-        prc = hv.Curve(groupbyweekday('precipitation_intensity'),label="Intensity of precipitation Time-Series by Weekdays").opts(color="skyblue")
-        dew = hv.Curve(groupbyweekday('dewpoint'),label="Dewpoint Time-Series by Weekdays").opts(color="lightgreen")
-        xlab = "Weekdays"
-    else:
-        temp = hv.Curve(groupbyperiods('temperature'),label="temperature").opts(color="red")
-        apTemp = hv.Curve(groupbyperiods('apparent_temperature'),label="apparent_temperature").opts(color="orange")
-        temps = (temp * apTemp).opts(opts.Curve(title='Temperature Time-Series by Periods of day')).opts(legend_position='top',legend_cols=2)
-        hmd = hv.Curve(groupbyperiods('humidity'),label="Humidity Time-Series by Periods of day").opts(color="brown")
-        vis = hv.Curve(groupbyperiods('visibility'),label="Visibility Time-Series by Periods of day").opts(color="blue")
-        prs = hv.Curve(groupbyperiods('pressure'),label="Pressure Time-Series by Periods of day").opts(color="green")
-        wnd = hv.Curve(groupbyperiods('windspeed'),label="Windspeed Time-Series by Periods of day").opts(color="purple")
-        prc = hv.Curve(groupbyperiods('precipitation_intensity'),label="Intensity of precipitation Time-Series by Periods of day").opts(color="skyblue")
-        dew = hv.Curve(groupbyperiods('dewpoint'),label="Dewpoint Time-Series by Periods of day").opts(color="lightgreen")
-        xlab = "Periods of day"
-        
-    weather_timeseries = temps + hmd + vis + prs + wnd + prc + dew
-    weather_timeseries.opts(opts.Curve(xrotation= 30, xlabel=xlab, ylabel="Values", width=500, height=400,tools=['hover'],show_grid=True)).cols(2)
-    st.bokeh_chart(hv.render(weather_timeseries, backend='bokeh'))    
-    
-  
+    for items in range(len(weather_element)):
+        if box3 == 'by day':
+            ts_items[items] = hv.Curve(df[weather_element[items]].resample('D').mean()).opts(color=colors[items], title=f'{weather_element[items]} Time-Series by Day')
+            #xlab = "Day"
+        elif box3 == 'by month':
+            ts_items[items] = hv.Curve(groupbymonth(weather_element[items]),label=f"{weather_element[items]} Time-Series by Month").opts(color=colors[items])
+            #xlab = "Months"
+        elif box3 == 'by weekdays':
+            ts_items[items] = hv.Curve(groupbyweekday(weather_element[items]),label=f"{weather_element[items]} Time-Series by Weekdays").opts(color=colors[items])
+            #xlab = "Weekdays"
+        else:
+            ts_items[items] = hv.Curve(groupbyperiods(weather_element[items]),label=f"{weather_element[items]} Time-Series by Periods of day").opts(color=colors[items])
+            #xlab = "Periods of day"
+    return ts_items
+      
 prox = [df_day, df_month]
 def atem_vscon():
     if box4 == 'day':
@@ -346,8 +279,16 @@ def energy_dist():
         df_sub = df.filter(items=['Home office', 'Wine cellar', 'Barn', 'Living room', 'Kitchen'])
     elif option1 == 'devices':    
         df_sub = df.filter(items=['Dishwasher', 'Furnace',  'Fridge', 'Garage door', 'Well', 'Microwave'])
+        with st.expander("See explanation"):
+             st.write("""
+         Watch out! Your Furnace is eating up all the energy!
+     """)
     else:
         df_sub = df.filter(items=['Home office', 'Wine cellar', 'Barn', 'Living room', 'Kitchen', 'Dishwasher', 'Furnace',  'Fridge', 'Garage door', 'Well', 'Microwave'])
+        with st.expander("See explanation"):
+             st.write("""
+         Watch out! Your Furnace is eating up all the energy!
+     """)
 
     sub_sum = pd.DataFrame(df_sub.sum(axis=0), columns=['total_energy_consumption'])
     bar_chart = hv.Bars(sub_sum).opts(opts.Bars(color='green'))
@@ -358,32 +299,24 @@ def energy_dist():
 
 ######################################################################################################################################################
 
-
-st.header(option)
 if option == 'Energy Management Dashboard':
-    st.subheader("Missing timestamp?")
-    """
-    To ensure that there is no temporal gaps in the data, i.e. there is no abrupt time jump or missing timestamp, the timestamp v/s index is plotted.
-    """
-    st.image("timestamp.jpg")
+    st.header('Energy Dashboard')
+#     st.subheader("Missing timestamp?")
+#     """
+#     To ensure that there is no temporal gaps in the data, i.e. there is no abrupt time jump or missing timestamp, the timestamp v/s index is plotted.
+#     """
+#     st.image("timestamp.jpg")
     
              
-    st.subheader("Here's how our dataframe (for hourly redaing) looks like after cleaning:")
-    st.dataframe(df)
-    
-    st.subheader("Distribution")
-    radio3_names = ['Consumption and Generation', 'House Appliances', 'Weather Information']
-    box5 = st.radio(
-     "select which distribution should be plotted?", radio3_names)
-    st.write("You've selected", box5, "distribution")
-    dist()
+#     st.subheader("Here's how our dataframe (for hourly redaing) looks like after cleaning:")
+#     st.dataframe(df)
     
     st.subheader("Average energy consumption")
     radio1_names = ['per day', 'per month']
     genre = st.radio(
      "Plot average energy consumption", radio1_names, index=0)
     avg_econ_t()
-    #st.expander
+    
 
     st.subheader("Total Energy Consumption and Generation Time-Series")
     box1 = st.selectbox(
@@ -392,6 +325,10 @@ if option == 'Energy Management Dashboard':
 
     st.write("You've selected total energy consumption and generation time-series", box1) 
     ts_congen()
+    with st.expander("See explanation"):
+     st.write("""
+         with the start of cold season, energy consumption increases from November to February, and decreases from March to July. On the other hand, eneregy generation gradually rises from January to April and reaches its peak at June then slowly declines for the rest of the year.
+     """)
     
     st.subheader("Rooms and Appliances Time-Series")
     st.write("select rooms and appliances Time-Series by day, month, weekdays or periods of day:")
@@ -399,7 +336,11 @@ if option == 'Energy Management Dashboard':
      'select items',
      ('by day', 'by month', 'by weekdays', 'by periods of day'))
     st.write('You selected:', box2)
-    appl_ts()
+    dw, ho, fr, wc, gd, ba, we, mcr, lr, fu, ki = appl_ts()
+    appliances_timeseries = dw + ho + fr + wc + gd + ba + we + mcr + lr + fu + ki
+    appliances_timeseries.opts(opts.Curve(xlabel='time', line_width=0.75, ylabel="Energy Consumption", yformatter='%.2fkw' ,
+                                                                           width=500, height=400,tools=['hover'],show_grid=True)).cols(2)
+    st.bokeh_chart(hv.render(appliances_timeseries, backend='bokeh'))
     
     st.subheader("Weather Information Time-Series")
     st.write("select weather elements Time-Series by day, month, weekdays or periods of day:")
@@ -407,14 +348,25 @@ if option == 'Energy Management Dashboard':
     box3 = st.selectbox(
      "select time-series", box_names)
     st.write("You've selected weather element time-series", box3)
-    weather_ts()
-
-    st.subheader("Relation between apparent Temperature and Household overall energy consumption")
-    box4 = st.selectbox('select by?',
-     ('day', 'month'))
-    st.write("You've selected relation between apparent temperature and household overall energy consumption by", box4)
-    atem_vscon()
+    apTemp, hmd, vis, prs, wnd, prc, dew = weather_ts()
+    weather_timeseries = apTemp + hmd + vis + prs + wnd + prc + dew
+    weather_timeseries.opts(opts.Curve(xrotation= 30, xlabel='time', ylabel="Values", width=400, height=300,tools=['hover'],show_grid=True)).cols(2)
+    st.bokeh_chart(hv.render(weather_timeseries, backend='bokeh'))
     
+    st.subheader("Explore energy consumption distribution")
+    radio3_names = ['Consumption and Generation', 'House Appliances', 'Weather Information']
+    box5 = st.radio(
+     "select which distribution should be plotted?", radio3_names)
+    st.write("You've selected", box5, "distribution")
+    dist()
+
+#     st.subheader("Relation between apparent Temperature and Household overall energy consumption")
+#     box4 = st.selectbox('select by?',
+#      ('day', 'month'))
+#     st.write("You've selected relation between apparent temperature and household overall energy consumption by", box4)
+#     atem_vscon()
+
+elif option == 'Usage by rooms and appliances':
     st.subheader("Total Energy Consumption Distribution")
     option1 = st.radio(
      "Plot distribution for",
@@ -422,8 +374,7 @@ if option == 'Energy Management Dashboard':
     
     st.write("You've selected Total Energy Consumption Distribution by", option1)
     energy_dist()
-        
-   
-   
-
     
+else:
+    st.write('construction site, still on progress...!')
+    st.image('baustelle.jpg')
