@@ -350,7 +350,7 @@ if option == 'Energy Management Dashboard':
     dw, ho, fr, wc, gd, ba, we, mcr, lr, fu, ki = appl_ts()
     appliances_timeseries = dw + ho + fr + wc + gd + ba + we + mcr + lr + fu + ki
     appliances_timeseries.opts(opts.Curve(xlabel='time', ylabel="Energy Consumption", yformatter='%.2fkw' ,
-                                                                           width=450, height=350,tools=['hover'],show_grid=True)).cols(2) 
+                                                                           width=500, height=400,tools=['hover'],show_grid=True)).cols(2) 
     st.bokeh_chart(hv.render(appliances_timeseries, backend='bokeh'))
     
     st.subheader("Weather Information Time-Series")
@@ -361,7 +361,7 @@ if option == 'Energy Management Dashboard':
     st.write("You've selected weather element time-series", box3)
     apTemp, hmd, vis, prs, wnd, prc, dew = weather_ts()
     weather_timeseries = apTemp + hmd + vis + prs + wnd + prc + dew
-    weather_timeseries.opts(opts.Curve(xlabel='time', ylabel="Values", width=450, height=350,tools=['hover'],show_grid=True)).cols(2)  
+    weather_timeseries.opts(opts.Curve(xlabel='time', ylabel="Values", width=500, height=400,tools=['hover'],show_grid=True)).cols(2)  
     st.bokeh_chart(hv.render(weather_timeseries, backend='bokeh'))
     
     st.subheader("Explore energy consumption distribution")
