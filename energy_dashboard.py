@@ -113,8 +113,8 @@ df['weekofyear'] = df['Date & Time'].dt.isocalendar().week # df['Date & Time'].d
 df['hour'] = df['Date & Time'].dt.hour
 
 df = df.set_index('Date & Time')
-df_day = df.groupby(pd.Grouper(freq='1D')).mean()
-df_month = df.groupby(pd.Grouper(freq='1M')).mean()
+# df_day = df.groupby(pd.Grouper(freq='1D')).mean()
+# df_month = df.groupby(pd.Grouper(freq='1M')).mean()
 #df.index = pd.to_datetime(df.index)
 
 def periods(x):
@@ -138,8 +138,17 @@ df['periodsofday'] = df['hour'].apply(periods)
 
 df.rename({'windSpeed': 'windspeed', 'windBearing': 'windbearing', 'precipIntensity': 'precipitation_intensity', 'dewPoint': 'dewpoint', 'precipProbability': 'precipitation_probability', 'apparentTemperature_Celsius': 'apparent_temperature', 'temperature_Celsius': 'temperature'}, axis=1, inplace=True)
 
+# converting 'month' column values from month integers to month name
+df['month'] = pd.to_datetime(df['month'], format='%m').dt.month_name().str.slice(stop=3)
+
 def groupbymonth(col):
-    return df[[col, 'month']].groupby(by='month').agg({col:'mean'})[col]
+    #return df[[col, 'month']].groupby(by='month').agg({col:'mean'})[col]
+    monthdf = df.groupby('month').agg({col:['mean']})
+    monthdf.columns = [f"{i[0]}_{i[1]}" for i in monthdf.columns]
+    monthdf['month_num'] = [['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].index(i) for i in monthdf.index]
+    monthdf.sort_values('month_num', inplace=True)
+    monthdf.drop('month_num', axis=1, inplace=True)
+    return monthdf
     
 def groupbyweekday(col):
     weekdaydf = df.groupby('weekday').agg({col:['mean']})
@@ -226,7 +235,7 @@ def ts_congen():
 
     
 cols = ['Dishwasher', 'Home office', 'Fridge', 'Wine cellar', 'Garage door', 'Barn',  'Well', 'Microwave', 'Living room', 'Furnace', 'Kitchen']
-colors = ["red", "orange", "blue", "yellow", "green", "grey", "purple", "pink", "skyblue", "lightgreen", "brown"]
+colors = ["red",  "teal", "blue", "magenta", "orange", "green", "brown", "purple", "grey", "salmon", "turquoise"]
 
 curve_Items = ['dw', 'ho', 'fr', 'wc', 'gd', 'ba', 'we', 'mcr', 'lr', 'fu', 'ki']    
 def appl_ts():
@@ -263,16 +272,16 @@ def weather_ts():
             #xlab = "Periods of day"
     return ts_items
       
-prox = [df_day, df_month]
-def atem_vscon():
-    if box4 == 'day':
-        data = prox[0]
-    else:
-        data = prox[1]
+# prox = [df_day, df_month]
+# def atem_vscon():
+#     if box4 == 'day':
+#         data = prox[0]
+#     else:
+#         data = prox[1]
         
-    scatter = hv.Scatter(data, kdims='apparentTemperature_Celsius', vdims='HO_use')
-    scatter.opts(width=800, height=500, title='Relation between apparent Temperature and Household overall energy consumption', xlabel='apparent Temperature in [°C]', ylabel='Consumption in [kWh]')
-    st.bokeh_chart(hv.render(scatter, backend='bokeh')) 
+#     scatter = hv.Scatter(data, kdims='apparentTemperature_Celsius', vdims='HO_use')
+#     scatter.opts(width=800, height=500, title='Relation between apparent Temperature and Household overall energy consumption', xlabel='apparent Temperature in [°C]', ylabel='Consumption in [kWh]')
+#     st.bokeh_chart(hv.render(scatter, backend='bokeh')) 
     
 def energy_dist():
     if option1 == 'rooms':
@@ -291,9 +300,11 @@ def energy_dist():
      """)
 
     sub_sum = pd.DataFrame(df_sub.sum(axis=0), columns=['total_energy_consumption'])
-    bar_chart = hv.Bars(sub_sum).opts(opts.Bars(color='green'))
-    bar_chart.opts(xrotation=90, width=600, height=400, xlabel=f'{option1}', ylabel='Consumption [kWh]', title=f'Total Consumption by all {option1} in [kWh] from 2014-2016' )    
-    st.bokeh_chart(hv.render(bar_chart, backend='bokeh'))
+    bar_chart = hv.Bars(sub_sum).opts(opts.Bars(color='blue', ylim=(0, 5600)))
+    hline = hv.HLine(3500).opts(color='red', line_dash='dashed', line_width=2.0)
+    bars =  bar_chart * hline
+    bars.opts(xrotation=90, width=600, height=400, xlabel=f'{option1}', ylabel='Consumption [kWh]', title=f'Total Consumption by all {option1} in [kWh] from 2014-2016' )    
+    st.bokeh_chart(hv.render(bars, backend='bokeh'))
     
 
 
@@ -326,31 +337,31 @@ if option == 'Energy Management Dashboard':
     st.write("You've selected total energy consumption and generation time-series", box1) 
     ts_congen()
     with st.expander("See explanation"):
-     st.write("""
-         with the start of cold season, energy consumption increases from November to February, and decreases from March to July. On the other hand, eneregy generation gradually rises from January to April and reaches its peak at June then slowly declines for the rest of the year.
+        st.write("""
+         with the start of cold season, energy consumption increases from November to February, and gradually decreases after February till May. On the other hand, eneregy generation gradually rises from January to April and reaches its peak at June then slowly declines for the rest of the year.
      """)
     
     st.subheader("Rooms and Appliances Time-Series")
     st.write("select rooms and appliances Time-Series by day, month, weekdays or periods of day:")
     box2 = st.selectbox(
      'select items',
-     ('by day', 'by month', 'by weekdays', 'by periods of day'))
+     ('by day', 'by month', 'by weekdays', 'by periods of day'), index=1)
     st.write('You selected:', box2)
     dw, ho, fr, wc, gd, ba, we, mcr, lr, fu, ki = appl_ts()
     appliances_timeseries = dw + ho + fr + wc + gd + ba + we + mcr + lr + fu + ki
-    appliances_timeseries.opts(opts.Curve(xlabel='time', line_width=0.75, ylabel="Energy Consumption", yformatter='%.2fkw' ,
-                                                                           width=500, height=400,tools=['hover'],show_grid=True)).cols(2)
+    appliances_timeseries.opts(opts.Curve(xlabel='time', ylabel="Energy Consumption", yformatter='%.2fkw' ,
+                                                                           width=450, height=350,tools=['hover'],show_grid=True)).cols(2) 
     st.bokeh_chart(hv.render(appliances_timeseries, backend='bokeh'))
     
     st.subheader("Weather Information Time-Series")
     st.write("select weather elements Time-Series by day, month, weekdays or periods of day:")
     box_names = ['by day', 'by month', 'by weekdays', 'by periods of day']
     box3 = st.selectbox(
-     "select time-series", box_names)
+     "select time-series", box_names, index=1)
     st.write("You've selected weather element time-series", box3)
     apTemp, hmd, vis, prs, wnd, prc, dew = weather_ts()
     weather_timeseries = apTemp + hmd + vis + prs + wnd + prc + dew
-    weather_timeseries.opts(opts.Curve(xrotation= 30, xlabel='time', ylabel="Values", width=400, height=300,tools=['hover'],show_grid=True)).cols(2)
+    weather_timeseries.opts(opts.Curve(xlabel='time', ylabel="Values", width=450, height=350,tools=['hover'],show_grid=True)).cols(2)  
     st.bokeh_chart(hv.render(weather_timeseries, backend='bokeh'))
     
     st.subheader("Explore energy consumption distribution")
@@ -370,7 +381,7 @@ elif option == 'Usage by rooms and appliances':
     st.subheader("Total Energy Consumption Distribution")
     option1 = st.radio(
      "Plot distribution for",
-     ('rooms', 'devices', 'all features'))
+     ('rooms', 'devices', 'all features'), index=2)
     
     st.write("You've selected Total Energy Consumption Distribution by", option1)
     energy_dist()
