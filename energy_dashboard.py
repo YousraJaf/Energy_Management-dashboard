@@ -301,7 +301,7 @@ def energy_dist():
 
     sub_sum = pd.DataFrame(df_sub.sum(axis=0), columns=['total_energy_consumption'])
     bar_chart = hv.Bars(sub_sum).opts(opts.Bars(color='blue', ylim=(0, 5600)))
-    hline = hv.HLine(3500).opts(color='red', line_dash='dashed', line_width=2.0)
+    hline = hv.HLine(3500).opts(color='red', line_dash='dashed', line_width=2.0) * hv.Text('Barn', 3700, "optimal average consumption").opts(color='red')
     bars =  bar_chart * hline
     bars.opts(xrotation=90, width=600, height=400, xlabel=f'{option1}', ylabel='Consumption [kWh]', title=f'Total Consumption by all {option1} in [kWh] from 2014-2016' )    
     st.bokeh_chart(hv.render(bars, backend='bokeh'))
